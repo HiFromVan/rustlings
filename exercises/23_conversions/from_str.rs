@@ -41,9 +41,33 @@ enum ParsePersonError {
 impl FromStr for Person {
     type Err = ParsePersonError;
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {}
-}
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        // 1. 切分字符串
+        let parts: Vec<&str> = s.split(',').collect();
 
+        // 2. 检查长度是否恰好为 2
+        if parts.len() != 2 {
+            return Err(ParsePersonError::BadLen);
+        }
+
+        // 3 & 4. 获取并检查名字
+        let name = parts[0];
+        if name.is_empty() {
+            return Err(ParsePersonError::NoName);
+        }
+
+        // 5 & 6. 解析年龄
+        // 使用 .map_err 将原生的 ParseIntError 包装成我们自定义的 ParseInt 变体
+        let age = parts[1]
+            .parse::<u8>()
+            .map_err(ParsePersonError::ParseInt)?;
+
+        Ok(Person {
+            name: name.to_string(),
+            age,
+        })
+    }
+}
 fn main() {
     let p = "Mark,20".parse::<Person>();
     println!("{p:?}");

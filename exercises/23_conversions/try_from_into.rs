@@ -25,25 +25,53 @@ enum IntoColorError {
 
 // TODO: Tuple implementation.
 // Correct RGB color values must be integers in the 0..=255 range.
+// 辅助函数：将 i16 安全地转换为 u8
+fn to_u8(value: i16) -> Result<u8, IntoColorError> {
+    u8::try_from(value).map_err(|_| IntoColorError::IntConversion)
+}
+
+// 1. Tuple 实现
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = IntoColorError;
 
-    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {}
+    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        Ok(Self {
+            red: to_u8(tuple.0)?,
+            green: to_u8(tuple.1)?,
+            blue: to_u8(tuple.2)?,
+        })
+    }
 }
 
-// TODO: Array implementation.
+// 2. Array 实现
 impl TryFrom<[i16; 3]> for Color {
     type Error = IntoColorError;
 
-    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {}
+    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        // 直接复用元组的逻辑，或者手动解构
+        Ok(Self {
+            red: to_u8(arr[0])?,
+            green: to_u8(arr[1])?,
+            blue: to_u8(arr[2])?,
+        })
+    }
 }
 
-// TODO: Slice implementation.
-// This implementation needs to check the slice length.
+// 3. Slice 实现
 impl TryFrom<&[i16]> for Color {
     type Error = IntoColorError;
 
-    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {}
+    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        // 切片额外需要检查长度
+        if slice.len() != 3 {
+            return Err(IntoColorError::BadLen);
+        }
+        Ok(Self {
+            red: to_u8(slice[0])?,
+            green: to_u8(slice[1])?,
+            blue: to_u8(slice[2])?,
+        })
+    }
 }
 
 fn main() {
